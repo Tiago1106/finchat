@@ -21,6 +21,7 @@
 - **Escopos válidos:** `backend`, `mobile`, `docs`, `infra`, `config`
 - **Idioma:** descrição em português
 - **Sempre fazer push após commit**
+- **Commits pequenos e focados:** cada commit deve conter o mínimo de arquivos possível, agrupando por contexto (ex: um commit por módulo, não vários módulos juntos). PRs devem ser enxutos e fáceis de revisar
 - Nunca commitar: `.env`, credenciais, chaves, `node_modules/`, arquivos de build
 
 ### Branches

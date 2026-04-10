@@ -4,6 +4,8 @@ import { DatabaseModule } from './database/database.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { CategoriesModule } from './categories/categories.module.js';
 import { CardsModule } from './cards/cards.module.js';
+import { ExpensesModule } from './expenses/expenses.module.js';
+import { DashboardModule } from './dashboard/dashboard.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
@@ -17,6 +19,8 @@ import { AppService } from './app.service.js';
     AuthModule,
     CategoriesModule,
     CardsModule,
+    ExpensesModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
