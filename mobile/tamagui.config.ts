@@ -6,7 +6,7 @@ import { createTamagui, createTokens, createFont } from 'tamagui';
 // ============================================================
 
 const k2dFont = createFont({
-  family: 'K2D',
+  family: 'K2D_400Regular',
   size: {
     1: 12,   // body-sm, label-sm
     2: 14,   // body-md, label, button
@@ -35,6 +35,12 @@ const k2dFont = createFont({
     1: 0,
     2: -0.2,
     3: -0.4,
+  },
+  face: {
+    400: { normal: 'K2D_400Regular' },
+    500: { normal: 'K2D_500Medium' },
+    600: { normal: 'K2D_600SemiBold' },
+    700: { normal: 'K2D_700Bold' },
   },
 });
 
