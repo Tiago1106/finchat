@@ -5,6 +5,12 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { TamaguiProvider } from 'tamagui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  K2D_400Regular,
+  K2D_500Medium,
+  K2D_600SemiBold,
+  K2D_700Bold,
+} from '@expo-google-fonts/k2d';
 
 import tamaguiConfig from '../tamagui.config';
 import { useAuthStore } from '@/stores/auth.store';
@@ -29,7 +35,10 @@ const queryClient = new QueryClient({
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    // K2D será adicionada na Fase 4 — por enquanto usa system font
+    K2D_400Regular,
+    K2D_500Medium,
+    K2D_600SemiBold,
+    K2D_700Bold,
   });
 
   useEffect(() => {
