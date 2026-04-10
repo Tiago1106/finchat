@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
@@ -21,8 +21,14 @@ export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
-// Manter splash screen até carregar fontes e auth
+// Manter splash nativa visível até tudo estar pronto
 SplashScreen.preventAutoHideAsync();
+
+// Fade suave ao esconder a splash
+SplashScreen.setOptions({
+  duration: 500,
+  fade: true,
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,24 +40,35 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [fontsLoaded, fontsError] = useFonts({
     K2D_400Regular,
     K2D_500Medium,
     K2D_600SemiBold,
     K2D_700Bold,
   });
 
+  const { isLoading: authLoading, loadStoredAuth } = useAuthStore();
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Carregar auth salva no SecureStore
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    loadStoredAuth().finally(() => setAuthChecked(true));
+  }, []);
 
   useEffect(() => {
-    if (loaded) {
+    if (fontsError) throw fontsError;
+  }, [fontsError]);
+
+  // Só esconder splash quando fonts E auth estiverem prontos
+  const appReady = fontsLoaded && authChecked && !authLoading;
+
+  useEffect(() => {
+    if (appReady) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [appReady]);
 
-  if (!loaded) {
+  if (!appReady) {
     return null;
   }
 
@@ -59,19 +76,12 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { isAuthenticated, isLoading, loadStoredAuth } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
 
-  // Carregar auth salva no SecureStore
-  useEffect(() => {
-    loadStoredAuth();
-  }, []);
-
   // Redirecionar baseado no estado de auth
   useEffect(() => {
-    if (isLoading) return;
-
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!isAuthenticated && !inAuthGroup) {
@@ -79,7 +89,7 @@ function RootLayoutNav() {
     } else if (isAuthenticated && inAuthGroup) {
       router.replace('/(tabs)/chat');
     }
-  }, [isAuthenticated, segments, isLoading]);
+  }, [isAuthenticated, segments]);
 
   return (
     <QueryClientProvider client={queryClient}>
