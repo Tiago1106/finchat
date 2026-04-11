@@ -17,9 +17,11 @@ interface AuthState {
   refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  needsBiometric: boolean;
   setAuth: (user: User, accessToken: string, refreshToken: string) => Promise<void>;
   clearAuth: () => Promise<void>;
   loadStoredAuth: () => Promise<void>;
+  clearBiometric: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -28,12 +30,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   refreshToken: null,
   isAuthenticated: false,
   isLoading: true,
+  needsBiometric: false,
 
   setAuth: async (user, accessToken, refreshToken) => {
     await SecureStore.setItemAsync('access_token', accessToken);
     await SecureStore.setItemAsync('refresh_token', refreshToken);
     await SecureStore.setItemAsync('user', JSON.stringify(user));
-    set({ user, accessToken, refreshToken, isAuthenticated: true });
+    // Login fresco não precisa de biometria (acabou de digitar senha)
+    set({ user, accessToken, refreshToken, isAuthenticated: true, needsBiometric: false });
   },
 
   clearAuth: async () => {
@@ -45,6 +49,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
+      needsBiometric: false,
     });
   },
 
@@ -56,12 +61,17 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       if (accessToken && refreshToken && userStr) {
         const user = JSON.parse(userStr) as User;
-        set({ user, accessToken, refreshToken, isAuthenticated: true, isLoading: false });
+        // Sessão restaurada do storage → precisa de biometria para desbloquear
+        set({ user, accessToken, refreshToken, isAuthenticated: true, isLoading: false, needsBiometric: true });
       } else {
         set({ isLoading: false });
       }
     } catch {
       set({ isLoading: false });
     }
+  },
+
+  clearBiometric: () => {
+    set({ needsBiometric: false });
   },
 }));
