@@ -243,7 +243,7 @@ export default function RegisterScreen() {
             color="$textTertiary"
             textAlign="center"
             pressStyle={{ opacity: 0.7 }}
-            onPress={() => router.back()}
+            onPress={() => router.replace('/(auth)/login')}
           >
             Já tem conta? Entrar
           </Text>
