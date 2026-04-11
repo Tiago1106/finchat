@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
@@ -90,24 +90,34 @@ interface RootLayoutNavProps {
 }
 
 function RootLayoutNav({ onboardingSeen }: RootLayoutNavProps) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, needsBiometric } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
+  const hasRedirectedToBiometric = useRef(false);
 
-  // Redirecionar baseado no estado de auth e onboarding
+  // Redirecionar baseado no estado de auth, onboarding e biometria
   useEffect(() => {
     const inAuthGroup = segments[0] === '(auth)';
+    const inBiometric = segments[1] === 'biometric';
 
     if (!isAuthenticated && !inAuthGroup) {
+      // Não autenticado — enviar para onboarding ou login
+      hasRedirectedToBiometric.current = false;
       if (!onboardingSeen) {
         router.replace('/(auth)/onboarding');
       } else {
         router.replace('/(auth)/login');
       }
-    } else if (isAuthenticated && inAuthGroup) {
+    } else if (isAuthenticated && needsBiometric && !inBiometric && !hasRedirectedToBiometric.current) {
+      // Autenticado mas precisa desbloquear biometria
+      hasRedirectedToBiometric.current = true;
+      router.replace('/(auth)/biometric');
+    } else if (isAuthenticated && !needsBiometric && inAuthGroup) {
+      // Autenticado, biometria liberada, sair do auth group
+      hasRedirectedToBiometric.current = false;
       router.replace('/(tabs)/chat');
     }
-  }, [isAuthenticated, segments]);
+  }, [isAuthenticated, segments, needsBiometric]);
 
   return (
     <QueryClientProvider client={queryClient}>
